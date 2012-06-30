@@ -1,3 +1,9 @@
+sbsigntool (0.3-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 30 Jun 2012 01:37:52 +0000
+
 sbsigntool (0.2-0ubuntu1) quantal; urgency=low
 
   * Initial release.

@@ -15,6 +15,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
+ *
+ * In addition, as a special exception, the copyright holders give
+ * permission to link the code of portions of this program with the OpenSSL
+ * library under certain conditions as described in each individual source file,
+ * and distribute linked combinations including the two.
+ *
+ * You must obey the GNU General Public License in all respects for all
+ * of the code used other than OpenSSL. If you modify file(s) with this
+ * exception, you may extend this exception to your version of the
+ * file(s), but you are not obligated to do so. If you do not wish to do
+ * so, delete this exception statement from your version. If you delete
+ * this exception statement from all source files in the program, then
+ * also delete it here.
  */
 #define _GNU_SOURCE
 
@@ -170,6 +183,7 @@ int main(int argc, char **argv)
 
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_digests();
+	OpenSSL_add_all_ciphers();
 
 	BIO *privkey_bio = BIO_new_file(keyfilename, "r");
 	EVP_PKEY *pkey = PEM_read_bio_PrivateKey(privkey_bio, NULL, NULL, NULL);
@@ -194,6 +208,11 @@ int main(int argc, char **argv)
 
 	PKCS7_SIGNER_INFO *si = PKCS7_sign_add_signer(p7, cert,
 			pkey, md, PKCS7_BINARY);
+	if (!si) {
+		fprintf(stderr, "error in key/certificate chain\n");
+		ERR_print_errors_fp(stderr);
+		return EXIT_FAILURE;
+	}
 
 	PKCS7_content_new(p7, NID_pkcs7_data);
 
