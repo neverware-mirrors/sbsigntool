@@ -1,3 +1,35 @@
+2012-06-28 b537e74 Jeremy Kerr <jeremy.kerr@canonical.com>
+
+  * Version 0.3
+
+2012-06-28 34f45aa Jeremy Kerr <jeremy.kerr@canonical.com>
+
+  * license: Add OpenSSL exception to GPLv3 terms
+
+2012-06-28 90ac52e Jeremy Kerr <jeremy.kerr@canonical.com>
+
+  * COPYING: remove non-license text
+
+2012-06-27 3a17b39 James Bottomley <jbottomley@parallels.com>
+
+  * image: fix signature calculation when there's junk at the end of the efi binary
+
+2012-06-28 99f2a9a Jeremy Kerr <jeremy.kerr@canonical.com>
+
+  * tests: Add test for PE/COFF cert table header validity
+
+2012-06-25 8d417f2 James Bottomley <jbottomley@parallels.com>
+
+  * image: fix incorrect assumption about signature header
+
+2012-06-28 585915b Jeremy Kerr <jeremy.kerr@canonical.com>
+
+  * sbsign: handle errors from PKCS7_sign_add_signer()
+
+2012-06-26 183ce60 James Bottomley <jbottomley@parallels.com>
+
+  * sbsign: fix failure to sign when key is password protected
+
 2012-06-20 c07dfb9 Ivan Hu <ivan.hu@canonical.com>
 
   * configure: Add check for bfh.h
