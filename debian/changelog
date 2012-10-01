@@ -1,3 +1,9 @@
+sbsigntool (0.3-0ubuntu2) quantal; urgency=low
+
+  * Only build on amd64 and i386 (LP: #1020771).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 01 Oct 2012 10:53:56 +0100
+
 sbsigntool (0.3-0ubuntu1) quantal; urgency=low
 
   * New upstream release.
