@@ -53,6 +53,7 @@
 
 #include "idc.h"
 #include "image.h"
+#include "fileio.h"
 
 static const char *toolname = "sbsign";
 
@@ -112,8 +113,8 @@ int main(int argc, char **argv)
 {
 	const char *keyfilename, *certfilename;
 	struct sign_context *ctx;
-	uint8_t *buf;
-	int rc, c;
+	uint8_t *buf, *tmp;
+	int rc, c, sigsize;
 
 	ctx = talloc_zero(NULL, struct sign_context);
 
@@ -179,26 +180,17 @@ int main(int argc, char **argv)
 
 	talloc_steal(ctx, ctx->image);
 
-	image_find_regions(ctx->image);
-
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 
-	BIO *privkey_bio = BIO_new_file(keyfilename, "r");
-	EVP_PKEY *pkey = PEM_read_bio_PrivateKey(privkey_bio, NULL, NULL, NULL);
-	if (!pkey) {
-		fprintf(stderr, "error reading private key %s\n", keyfilename);
+	EVP_PKEY *pkey = fileio_read_pkey(keyfilename);
+	if (!pkey)
 		return EXIT_FAILURE;
-	}
 
-	BIO *cert_bio = BIO_new_file(certfilename, "r");
-	X509 *cert = PEM_read_bio_X509(cert_bio, NULL, NULL, NULL);
-
-	if (!cert) {
-		fprintf(stderr, "error reading certificate %s\n", certfilename);
+	X509 *cert = fileio_read_cert(certfilename);
+	if (!cert)
 		return EXIT_FAILURE;
-	}
 
 	const EVP_MD *md = EVP_get_digestbyname("SHA256");
 
@@ -220,11 +212,12 @@ int main(int argc, char **argv)
 	if (rc)
 		return EXIT_FAILURE;
 
-	ctx->image->sigsize = i2d_PKCS7(p7, NULL);
-	ctx->image->sigbuf = buf = talloc_array(ctx->image,
-			uint8_t, ctx->image->sigsize);
-	i2d_PKCS7(p7, &buf);
+	sigsize = i2d_PKCS7(p7, NULL);
+	tmp = buf = talloc_array(ctx->image, uint8_t, sigsize);
+	i2d_PKCS7(p7, &tmp);
 	ERR_print_errors_fp(stdout);
+
+	image_add_signature(ctx->image, buf, sigsize);
 
 	if (ctx->detached)
 		image_write_detached(ctx->image, ctx->outfilename);

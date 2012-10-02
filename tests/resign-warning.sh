@@ -3,10 +3,5 @@
 signed="test.signed"
 
 "$sbsign" --cert "$cert" --key "$key" --output "$signed" "$image"
-
-set +e
-"$sbverify" --cert "missing-cert" "$signed"
-rc=$?
-set -e
-
-test $rc -eq 1
+"$sbsign" --cert "$cert" --key "$key" --output "$signed" "$signed" 2>&1 |
+	grep '^warning: overwriting'

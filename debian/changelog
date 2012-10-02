@@ -1,3 +1,10 @@
+sbsigntool (0.4-0ubuntu1) quantal; urgency=low
+
+  * New upstream release (FFe approved by Adam Conrad)
+  * Add new uuid-dev and gnu-efi build dependencies.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Tue, 02 Oct 2012 10:15:17 +0100
+
 sbsigntool (0.3-0ubuntu2) quantal; urgency=low
 
   * Only build on amd64 and i386 (LP: #1020771).

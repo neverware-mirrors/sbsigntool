@@ -1,11 +1,11 @@
-AC_INIT([sbsigntool], [0.3], [jeremy.kerr@canonical.com])
+AC_INIT([sbsigntool], [0.4], [jeremy.kerr@canonical.com])
 
 AM_INIT_AUTOMAKE()
 
 AC_PREREQ(2.60)
 
 AC_CONFIG_HEADERS(config.h)
-AC_CONFIG_SRCDIR(sbsign.c)
+AC_CONFIG_SRCDIR(src/sbsign.c)
 
 AM_PROG_AS
 AC_PROG_CC
@@ -59,5 +59,20 @@ PKG_CHECK_MODULES(libcrypto, libcrypto,
     [],
     AC_MSG_ERROR([libcrypto (from the OpenSSL package) is required]))
 
-AC_CONFIG_FILES([Makefile lib/ccan/Makefile tests/Makefile])
+PKG_CHECK_MODULES(uuid, uuid,
+    [],
+    AC_MSG_ERROR([libuuid (from the uuid package) is required]))
+
+dnl gnu-efi headers require extra include dirs
+EFI_ARCH=$(uname -m)
+EFI_CPPFLAGS="-I/usr/include/efi -I/usr/include/efi/$EFI_ARCH \
+ -DEFI_FUNCTION_WRAPPER"
+CPPFLAGS_save="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $EFI_CPPFLAGS"
+AC_CHECK_HEADERS([efi.h], [], [], $EFI_INCLUDES)
+CPPFLAGS="$CPPFLAGS_save"
+AC_SUBST(EFI_CPPFLAGS, $EFI_CPPFLAGS)
+
+AC_CONFIG_FILES([Makefile src/Makefile lib/ccan/Makefile]
+		[docs/Makefile tests/Makefile])
 AC_OUTPUT
