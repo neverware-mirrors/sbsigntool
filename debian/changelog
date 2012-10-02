@@ -1,7 +1,13 @@
+sbsigntool (0.4-0ubuntu2) quantal; urgency=low
+
+  * Fix FTBFS on i386 by defining EFI_ARCH to ia32 instead of uname.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 02 Oct 2012 07:44:59 -0600
+
 sbsigntool (0.4-0ubuntu1) quantal; urgency=low
 
-  * New upstream release (FFe approved by Adam Conrad)
-  * Add new uuid-dev and gnu-efi build dependencies.
+  * New upstream release.
+  * Add new uuid-dev and gnu-efi build dependancies.
 
  -- Andy Whitcroft <apw@ubuntu.com>  Tue, 02 Oct 2012 10:15:17 +0100
 
