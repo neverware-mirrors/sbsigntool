@@ -65,6 +65,11 @@ PKG_CHECK_MODULES(uuid, uuid,
 
 dnl gnu-efi headers require extra include dirs
 EFI_ARCH=$(uname -m)
+case $EFI_ARCH in
+	i*86)
+		EFI_ARCH="ia32"
+		;;
+esac
 EFI_CPPFLAGS="-I/usr/include/efi -I/usr/include/efi/$EFI_ARCH \
  -DEFI_FUNCTION_WRAPPER"
 CPPFLAGS_save="$CPPFLAGS"
