@@ -29,71 +29,22 @@
  * this exception statement from all source files in the program, then
  * also delete it here.
  */
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef FILEIO_H
+#define FILEIO_H
 
 #include <stdint.h>
 
-#include <bfd.h>
-#define DO_NOT_DEFINE_LINENO
+#include <openssl/evp.h>
+#include <openssl/x509.h>
 
-#include "coff/x86_64.h"
-#include "coff/external.h"
-#include "coff/pe.h"
+EVP_PKEY *fileio_read_pkey(const char *filename);
+X509 *fileio_read_cert(const char *filename);
 
-struct region {
-	void	*data;
-	int	size;
-	char	*name;
-};
+int fileio_read_file(void *ctx, const char *filename,
+		uint8_t **out_buf, size_t *out_len);
+int fileio_read_file_noerror(void *ctx, const char *filename,
+		 uint8_t **out_buf, size_t *out_len);
+int fileio_write_file(const char *filename, uint8_t *buf, size_t len);
 
-struct image {
-	int		fd;
-	void		*buf;
-	size_t		size;
-
-	/* Pointers to interesting parts of the image */
-	uint32_t	*checksum;
-	struct external_PEI_DOS_hdr *doshdr;
-	struct external_PEI_IMAGE_hdr *pehdr;
-	PEPAOUTHDR	*aouthdr;
-	struct data_dir_entry *data_dir;
-	struct data_dir_entry *data_dir_sigtable;
-	struct external_scnhdr *scnhdr;
-	int		sections;
-
-	void		*cert_table;
-	int		cert_table_size;
-
-	/* Regions that are included in the image hash: populated
-	 * during image parsing, then used during the hash process.
-	 */
-	struct region	*checksum_regions;
-	int		n_checksum_regions;
-
-	/* Generated signature */
-	void		*sigbuf;
-	size_t		sigsize;
-
-};
-
-struct data_dir_entry {
-	uint32_t	addr;
-	uint32_t	size;
-} __attribute__((packed));
-
-struct cert_table_header {
-	uint32_t size;
-	uint16_t revision;
-	uint16_t type;
-} __attribute__((packed));
-
-struct image *image_load(const char *filename);
-
-int image_find_regions(struct image *image);
-int image_hash_sha256(struct image *image, uint8_t digest[]);
-int image_write(struct image *image, const char *filename);
-int image_write_detached(struct image *image, const char *filename);
-
-#endif /* IMAGE_H */
+#endif /* FILEIO_H */
 
