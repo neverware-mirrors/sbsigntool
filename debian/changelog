@@ -1,3 +1,15 @@
+sbsigntool (0.6-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+    - Uses the new mount point for the efivars directory, for compatibility
+      with the pending upstream kernel patches and compatibility with what
+      mountall is doing.  LP: #1063061.
+    - Fixes sbverify verification of the pkcs7 bundles that Microsoft-signed
+      binaries deliver to us, enabling us to do build-time verification of
+      shim-signed.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 11 Oct 2012 17:24:56 -0700
+
 sbsigntool (0.4-0ubuntu2) quantal; urgency=low
 
   * Fix FTBFS on i386 by defining EFI_ARCH to ia32 instead of uname.
