@@ -1,15 +1,3 @@
-2012-10-02 53d38e7 Jeremy Kerr <jeremy.kerr@canonical.com>
-
-  * Version 0.4
-
-2012-10-02 e8a2989 Jeremy Kerr <jeremy.kerr@canonical.com>
-
-  * image: improve handling of unaligned section tables
-
-2012-10-02 c6996fc Jeremy Kerr <jeremy.kerr@canonical.com>
-
-  * image: use data_size in cert table header
-
 2012-09-28 01d2aa4 Jeremy Kerr <jeremy.kerr@canonical.com>
 
   * image: improve section table parsing
