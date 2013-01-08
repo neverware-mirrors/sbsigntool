@@ -9,6 +9,7 @@ Vcs-Bzr: lp:ubuntu/sbsigntool
 
 Package: sbsigntool
 Architecture: any-amd64 any-i386
+Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: utility for signing and verifying files for UEFI Secure Boot
  This package provides utilities that can be used for signing PE programs
