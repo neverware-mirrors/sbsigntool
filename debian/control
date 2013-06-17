@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Steve Langasek <vorlon@debian.org>
 Standards-Version: 3.9.3
-Build-Depends: binutils-dev, debhelper (>= 9), libssl-dev, help2man, openssl, pkg-config, uuid-dev, gnu-efi
+Build-Depends: binutils-dev, debhelper (>= 9), libssl-dev, help2man, openssl, pkg-config, uuid-dev, gnu-efi, gcc-multilib
 Vcs-Bzr: lp:ubuntu/sbsigntool
 
 Package: sbsigntool
