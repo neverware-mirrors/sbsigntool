@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <ccan/endian/endian.h>
 #include <ccan/talloc/talloc.h>
 #include <ccan/read_write_all/read_write_all.h>
 #include <ccan/build_assert/build_assert.h>
@@ -127,6 +128,62 @@ static int image_pecoff_parse_64(struct image *image)
 	image->data_dir = (void *)image->opthdr.opt_64->DataDirectory;
 	image->checksum = (uint32_t *)image->opthdr.opt_64->CheckSum;
 	return 0;
+}
+
+static uint16_t csum_update_fold(uint16_t csum, uint16_t x)
+{
+	uint32_t new = csum + x;
+	new = (new >> 16) + (new & 0xffff);
+	return new;
+}
+
+static uint16_t csum_bytes(uint16_t checksum, void *buf, size_t len)
+{
+	unsigned int i;
+	uint16_t *p;
+
+	for (i = 0; i < len; i += sizeof(*p)) {
+		p = buf + i;
+		checksum = csum_update_fold(checksum, *p);
+	}
+
+	return checksum;
+}
+
+static void image_pecoff_update_checksum(struct image *image,
+                                        struct cert_table_header *cert_table)
+{
+	bool is_signed = image->sigsize && image->sigbuf;
+	uint32_t checksum;
+
+	/* We carefully only include the signature data in the checksum (and
+	 * in the file length) if we're outputting the signature.  Otherwise,
+	 * in case of signature removal, the signature data is in the buffer
+	 * we read in (as indicated by image->size), but we do *not* want to
+	 * checksum it.
+	 *
+	 * We also skip the 32-bits of checksum data in the PE/COFF header.
+	 */
+	checksum = csum_bytes(0, image->buf,
+			(void *)image->checksum - (void *)image->buf);
+	checksum = csum_bytes(checksum,
+			image->checksum + 1,
+			(void *)(image->buf + image->data_size) -
+			(void *)(image->checksum + 1));
+
+	if (is_signed) {
+		checksum = csum_bytes(checksum,
+				cert_table, sizeof(*cert_table));
+
+		checksum = csum_bytes(checksum, image->sigbuf, image->sigsize);
+	}
+
+	checksum += image->data_size;
+
+	if (is_signed)
+		checksum += sizeof(*cert_table) + image->sigsize;
+
+	*(image->checksum) = cpu_to_le32(checksum);
 }
 
 static int image_pecoff_parse(struct image *image)
@@ -228,7 +285,7 @@ static int image_pecoff_parse(struct image *image)
 	if (cert_table && cert_table->revision == CERT_TABLE_REVISION &&
 			cert_table->type == CERT_TABLE_TYPE_PKCS &&
 			cert_table->size < size) {
-		image->sigsize = cert_table->size;
+		image->sigsize = cert_table->size - sizeof(*cert_table);
 		image->sigbuf = talloc_memdup(image, cert_table + 1,
 				image->sigsize);
 	}
@@ -425,6 +482,8 @@ reparse:
 	 * we've calculated during the pecoff parsing, so we need to redo that
 	 * too.
 	 */
+	image->data_size = align_up(image->data_size, 8);
+
 	if (image->data_size > image->size) {
 		image->buf = talloc_realloc(image, image->buf, uint8_t,
 				image->data_size);
@@ -521,6 +580,8 @@ int image_write(struct image *image, const char *filename)
 		image->data_dir_sigtable->addr = 0;
 		image->data_dir_sigtable->size = 0;
 	}
+
+	image_pecoff_update_checksum(image, &cert_table_header);
 
 	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
