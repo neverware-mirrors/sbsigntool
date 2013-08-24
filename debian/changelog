@@ -1,3 +1,20 @@
+sbsigntool (0.6-0ubuntu4) saucy; urgency=low
+
+  * debian/patches/efi_arch_ia32.patch: Use AC_CANONICAL_HOST, not uname -m,
+    to determine target. Closes LP: #1066038.
+  * debian/patches/Align-signature-data-to-8-bytes.patch: Align signature
+    data to 8 bytes.  This matches the Microsoft signing implementation,
+    which enables us to use sbattach to verify the integrity of the binaries
+    returned by the SysDev signing service.
+  * debian/patches/update_checksums.patch: make sure we update the PE checksum
+    field as well, also needed for matching the Microsoft signing
+    implementation.
+  * debian/patches/fix-signature-padding.patch: fix calculation of the
+    size of our signature data, so that we don't write out extra zeroes
+    when we detach a signature.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 23 Aug 2013 21:07:17 -0700
+
 sbsigntool (0.6-0ubuntu3) saucy; urgency=low
 
   * Build-depend on gcc-multilib to support building the test suite.
