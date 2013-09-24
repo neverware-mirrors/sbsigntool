@@ -1,3 +1,9 @@
+sbsigntool (0.6-0ubuntu4~12.10.1) quantal; urgency=low
+
+  * Backport to update SecureBoot support.  LP: #1229572.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 24 Sep 2013 14:35:28 -0700
+
 sbsigntool (0.6-0ubuntu4) saucy; urgency=low
 
   * debian/patches/efi_arch_ia32.patch: Use AC_CANONICAL_HOST, not uname -m,
