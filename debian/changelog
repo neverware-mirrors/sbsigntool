@@ -1,3 +1,9 @@
+sbsigntool (0.6-0ubuntu4~12.04.1) precise; urgency=low
+
+  * Backport to update SecureBoot support.  LP: #1229572.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 24 Sep 2013 14:35:28 -0700
+
 sbsigntool (0.6-0ubuntu4) saucy; urgency=low
 
   * debian/patches/efi_arch_ia32.patch: Use AC_CANONICAL_HOST, not uname -m,
@@ -26,6 +32,12 @@ sbsigntool (0.6-0ubuntu2) raring; urgency=low
   * Mark sbsigntool Multi-Arch: foreign.
 
  -- Colin Watson <cjwatson@ubuntu.com>  Tue, 08 Jan 2013 12:20:42 +0000
+
+sbsigntool (0.6-0ubuntu1~12.04.1) precise-proposed; urgency=low
+
+  * Backport to precise to support secure boot for 12.04.02.  LP: #1075181.
+
+ -- Andy Whitcroft <apw@canonical.com>  Mon, 19 Nov 2012 11:15:38 +0000
 
 sbsigntool (0.6-0ubuntu1) quantal; urgency=low
 
