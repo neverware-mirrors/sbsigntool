@@ -3,3 +3,4 @@ Align-signature-data-to-8-bytes.patch
 update_checksums.patch
 fix-signature-padding.patch
 ignore-certificate-expiries.patch
+add_corrected_efivars_magic.patch
