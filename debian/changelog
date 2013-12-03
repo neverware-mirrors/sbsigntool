@@ -1,3 +1,10 @@
+sbsigntool (0.6-0ubuntu6) trusty; urgency=low
+
+  * debian/patches/add_corrected_efivars_magic.patch: Cherry-picked upstream
+    fix to add corrected efivars magic (LP: #1257305)
+
+ -- Jean-Baptiste Lallement <jean-baptiste.lallement@ubuntu.com>  Tue, 03 Dec 2013 15:50:45 +0100
+
 sbsigntool (0.6-0ubuntu5) saucy; urgency=low
 
   * debian/patches/ignore-certificate-expiries.patch: ignore certificate
