@@ -1,3 +1,12 @@
+sbsigntool (0.6-0ubuntu7) trusty; urgency=medium
+
+  * debian/patches/del-duplicate-define.patch: Remove duplicate define.
+  * debian/patches/zero-sized-sections.patch: Fix failure in sbsigntool
+    when it encouters zero-sized PE/COFF image sections (LP: #1252288).
+  * debian/patches/arm-arm64-support.patch: Support signing ARM images.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 15 Apr 2014 14:54:42 +0100
+
 sbsigntool (0.6-0ubuntu6) trusty; urgency=low
 
   * debian/patches/add_corrected_efivars_magic.patch: Cherry-picked upstream

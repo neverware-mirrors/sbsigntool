@@ -4,3 +4,6 @@ update_checksums.patch
 fix-signature-padding.patch
 ignore-certificate-expiries.patch
 add_corrected_efivars_magic.patch
+del-duplicate-define.patch
+zero-sized-sections.patch
+arm-arm64-support.patch
