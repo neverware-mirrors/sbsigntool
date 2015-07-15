@@ -1,3 +1,11 @@
+sbsigntool (0.6-0ubuntu8) wily; urgency=medium
+
+  * debian/patches/0001-Support-openssl-1.0.2b-and-above.patch: [PATCH]
+    Support openssl 1.0.2b and above.  Thanks to Marc Deslauriers
+    <marc.deslauriers@ubuntu.com>.  LP: #1474541.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 15 Jul 2015 08:57:46 -0700
+
 sbsigntool (0.6-0ubuntu7) trusty; urgency=medium
 
   * debian/patches/del-duplicate-define.patch: Remove duplicate define.

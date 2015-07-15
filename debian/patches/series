@@ -7,3 +7,4 @@ add_corrected_efivars_magic.patch
 del-duplicate-define.patch
 zero-sized-sections.patch
 arm-arm64-support.patch
+0001-Support-openssl-1.0.2b-and-above.patch 
