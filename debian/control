@@ -1,0 +1,24 @@
+Source: sbsigntool
+Section: utils
+Priority: extra
+Maintainer: Pierre Chifflier <pollux@debian.org>
+Build-Depends: debhelper (>= 9.0.0),
+  dh-autoreconf,
+  gcc-multilib,
+  binutils-dev,
+  libssl-dev,
+  pkg-config,
+  automake,
+  uuid-dev,
+  help2man,
+  gnu-efi
+Standards-Version: 3.9.6
+Vcs-Bzr: lp:ubuntu/sbsigntool
+
+Package: sbsigntool
+Architecture: any-amd64 any-i386
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Tools to manipulate signatures on UEFI binaries and drivers
+ This package installs tools which can cryptographically sign EFI binaries and
+ drivers.
+ Currently it can only sign x86_64 EFI binaries and drivers.

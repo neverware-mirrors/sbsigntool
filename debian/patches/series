@@ -1,0 +1,11 @@
+01-efi-arch-ia32.patch
+10-tests-use-env.patch
+Align-signature-data-to-8-bytes.patch
+update_checksums.patch
+fix-signature-padding.patch
+ignore-certificate-expiries.patch
+add_corrected_efivars_magic.patch
+del-duplicate-define.patch
+zero-sized-sections.patch
+arm-arm64-support.patch
+0001-Support-openssl-1.0.2b-and-above.patch
