@@ -1,3 +1,11 @@
+sbsigntool (0.6-0ubuntu9) xenial; urgency=medium
+
+  [ Linn Crosetto ]
+  * debian/patches/0001-Handle-odd-buffer-lengths-in-checksum.patch:
+    Fix checksum when handling buffers of odd length.  LP: #1511108
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 19 Nov 2015 16:32:19 -0500
+
 sbsigntool (0.6-0ubuntu8) wily; urgency=medium
 
   * debian/patches/0001-Support-openssl-1.0.2b-and-above.patch: [PATCH]

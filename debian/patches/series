@@ -8,3 +8,4 @@ del-duplicate-define.patch
 zero-sized-sections.patch
 arm-arm64-support.patch
 0001-Support-openssl-1.0.2b-and-above.patch 
+0001-Handle-odd-buffer-lengths-in-checksum.patch
