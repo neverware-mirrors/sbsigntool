@@ -1,0 +1,42 @@
+From 132a512b712ea77859960b928d44dd58f8c9869d Mon Sep 17 00:00:00 2001
+From: Linn Crosetto <linn@hpe.com>
+Date: Tue, 27 Oct 2015 15:31:12 -0600
+Subject: [PATCH] Handle odd buffer lengths in checksum
+
+Buffers of odd length can be passed to the checksum, for example signatures.
+csum_bytes uses a uint16_t so change the function to prevent overflowing the
+buffer, while taking the extra byte into account if the length is odd.
+
+Signed-off-by: Linn Crosetto <linn@hpe.com>
+---
+ src/image.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/src/image.c b/src/image.c
+index d6e3c48..c41abd9 100644
+--- a/src/image.c
++++ b/src/image.c
+@@ -140,13 +140,16 @@ static uint16_t csum_update_fold(uint16_t csum, uint16_t x)
+ static uint16_t csum_bytes(uint16_t checksum, void *buf, size_t len)
+ {
+ 	unsigned int i;
+-	uint16_t *p;
++	uint16_t *p = buf;
+ 
+-	for (i = 0; i < len; i += sizeof(*p)) {
+-		p = buf + i;
+-		checksum = csum_update_fold(checksum, *p);
++	for (i = 0; i + sizeof(*p) <= len; i += sizeof(*p)) {
++		checksum = csum_update_fold(checksum, *p++);
+ 	}
+ 
++	/* if length is odd, add the remaining byte */
++	if (i < len)
++		checksum = csum_update_fold(checksum, *((uint8_t *)p));
++
+ 	return checksum;
+ }
+ 
+-- 
+2.6.1
+
