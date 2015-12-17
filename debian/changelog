@@ -1,3 +1,13 @@
+sbsigntool (0.6-0ubuntu10) xenial; urgency=medium
+
+  * debian/patches/sbverify_clear_out_cert_content.patch: clear out the
+    contents part of the certificate we're building for signature verification
+    from the EFI binary, in sbverify; OpenSSL 1.0.2e now enforces that there
+    isn't data and content sections together. Thanks to Marc Deslauriers for
+    help investigating this. (LP: #1526959)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 17 Dec 2015 14:55:09 -0500
+
 sbsigntool (0.6-0ubuntu9) xenial; urgency=medium
 
   [ Linn Crosetto ]
