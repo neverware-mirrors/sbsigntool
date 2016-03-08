@@ -1,3 +1,15 @@
+sbsigntool (0.6-2) unstable; urgency=medium
+
+  * Add missing build-dep on openssl (Closes: #816264)
+  * debian/patches/sbverify_clear_out_cert_content.patch: clear out the
+    contents part of the certificate we're building for signature
+    verification from the EFI binary, in sbverify; OpenSSL 1.0.2e now
+    enforces that there isn't data and content sections together.
+    Bakport from ubuntu patch (LP: #1526959)
+  * Bump Standards Version to 3.9.7
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 08 Mar 2016 08:11:10 +0100
+
 sbsigntool (0.6-1) unstable; urgency=low
 
   * Initial release (Closes: #702254)

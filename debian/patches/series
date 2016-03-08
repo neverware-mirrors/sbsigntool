@@ -9,3 +9,4 @@ del-duplicate-define.patch
 zero-sized-sections.patch
 arm-arm64-support.patch
 0001-Support-openssl-1.0.2b-and-above.patch
+sbverify_clear_out_cert_content.patch
