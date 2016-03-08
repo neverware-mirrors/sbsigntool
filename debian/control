@@ -7,12 +7,13 @@ Build-Depends: debhelper (>= 9.0.0),
   gcc-multilib,
   binutils-dev,
   libssl-dev,
+  openssl,
   pkg-config,
   automake,
   uuid-dev,
   help2man,
   gnu-efi
-Standards-Version: 3.9.6
+Standards-Version: 3.9.7
 Vcs-Bzr: lp:ubuntu/sbsigntool
 
 Package: sbsigntool
