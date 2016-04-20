@@ -151,12 +151,12 @@ int fileio_write_file(const char *filename, uint8_t *buf, size_t len)
 
 	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
-		perror("open");
+		perror("fileio_write_file/open");
 		return -1;
 	}
 
 	if (!write_all(fd, buf, len)) {
-		perror("write_all");
+		perror("fileio_write_file/write_all");
 		close(fd);
 		return -1;
 	}
