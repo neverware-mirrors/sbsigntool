@@ -19,6 +19,7 @@ Vcs-Bzr: lp:ubuntu/sbsigntool
 Package: sbsigntool
 Architecture: any-amd64 any-i386
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: foreign
 Description: Tools to manipulate signatures on UEFI binaries and drivers
  This package installs tools which can cryptographically sign EFI binaries and
  drivers.
