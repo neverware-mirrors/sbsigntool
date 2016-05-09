@@ -1,3 +1,12 @@
+sbsigntool (0.6-0ubuntu7.1) trusty; urgency=medium
+
+  * debian/patches/ubuntu-kernel-module-signing.patch: add signing support
+    programs for Ubuntu archive signing.  (LP: #1579766)
+  * debian/patches/ubuntu-kernel-module-signing-fixes.patch: add help
+    and update program name.  This is used to generate the new manual page.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Mon, 09 May 2016 18:03:53 +0100
+
 sbsigntool (0.6-0ubuntu7) trusty; urgency=medium
 
   * debian/patches/del-duplicate-define.patch: Remove duplicate define.
