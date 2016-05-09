@@ -1,3 +1,12 @@
+sbsigntool (0.6-0ubuntu11) yakkety; urgency=medium
+
+  * debian/patches/ubuntu-kernel-module-signing.patch: add signing support
+    programs for Ubuntu archive signing.  (LP: #1579766)
+  * tests: disable PIE mode when building examples for signing.
+  * src/image.c: ensure we zero image objects on allocation.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Mon, 09 May 2016 14:25:49 +0100
+
 sbsigntool (0.6-0ubuntu10) xenial; urgency=medium
 
   * debian/patches/sbverify_clear_out_cert_content.patch: clear out the
