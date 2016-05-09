@@ -37,6 +37,11 @@ License: GPL-3+ with OpenSSL exception
    this exception statement from all source files in the program, then
    also delete it here.
 
+Files: src/kmodsign.c
+Copyright: 2014-2015 Red Hat, Inc. All Rights Reserved.
+Copyright: 2015      Intel Corporation.
+License: GPL-2.1+
+
 Files: coff/*
 Copyright: 1999-2010 Free Software Foundation, Inc.
 License: GPL-3+
