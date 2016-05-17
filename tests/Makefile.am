@@ -22,19 +22,19 @@ test-%.pecoff: test-%.elf
 
 test-x86_64.pecoff: test_image_arch = x86-64
 test-x86_64.pecoff: test_lds = $(srcdir)/test-x86_64.lds
-test-x86_64.pecoff: ASFLAGS += -m64
+test-x86_64.pecoff: ASFLAGS += -m64 -fno-pic
 test-x86_64.pecoff: LDFLAGS += -m64
 test-i386.pecoff: test_image_arch = i386
 test-i386.pecoff: test_lds = $(srcdir)/test-i386.lds
-test-i386.pecoff: ASFLAGS += -m32
+test-i386.pecoff: ASFLAGS += -m32 -fno-pic
 test-i386.pecoff: LDFLAGS += -m32
 
-test-%.elf: LDFLAGS = -nostdlib -T $(test_lds)
+test-%.elf: LDFLAGS = -no-pie -nostdlib -T $(test_lds)
 test-%.elf: test-%.$(OBJEXT) $(test_lds)
 	$(LINK) $<
 
 test-%.$(OBJEXT): $(srcdir)/test.S
-	$(COMPILE.S) -o $@ $^
+	$(COMPILE.S) -fno-pie -o $@ $^
 
 $(test_key): Makefile
 	openssl genrsa -out $@ 2048
