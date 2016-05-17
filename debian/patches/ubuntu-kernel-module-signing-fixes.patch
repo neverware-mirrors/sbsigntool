@@ -1,0 +1,110 @@
+Description: Ubunty kernel module signing fixes
+ Separate out any local fixes we need to kmodsign.c to allow us to update
+ it more easily from mainline when necessary.
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1526959
+Forwarded: not-needed
+Author: Andy Whitcroft <apw@ubuntu.com>
+Last-Update: 2016-05-17
+
+Index: sbsigntool-0.6/src/kmodsign.c
+===================================================================
+--- sbsigntool-0.6.orig/src/kmodsign.c
++++ sbsigntool-0.6/src/kmodsign.c
+@@ -62,11 +62,26 @@ struct module_signature {
+ 
+ static char magic_number[] = "~Module signature appended~\n";
+ 
++static void usage(void)
++{
++	printf("Usage: kmodsign [-dpkD] <hash algo> <key> <x509> <module> [<dest>]\n"
++		"Sign a kernel module image for use with an enforcing kernel.\n\n"
++		"Options:\n"
++		"\t-p           save a copy of the p7s signature (.p7s)\n"
++		"\t-d           produce a detached signature file (.p7s) only\n"
++		"\t-D           produce a full detached signature block\n"
++		"\t             (may be cat'd onto the end of a module)\n"
++		"\t-k           switch to using keyid for identification\n");
++}
++static void version(void)
++{
++	printf("kmodsign 4.4\n");
++}
++
+ static __attribute__((noreturn))
+ void format(void)
+ {
+-	fprintf(stderr,
+-		"Usage: scripts/sign-file [-dp] <hash algo> <key> <x509> <module> [<dest>]\n");
++	usage();
+ 	exit(2);
+ }
+ 
+@@ -126,6 +141,12 @@ static int pem_pw_cb(char *buf, int len,
+ 	return pwlen;
+ }
+ 
++static struct option options[] = {
++	{ "version", no_argument, NULL, 'V' },
++	{ "help", no_argument, NULL, 'h' },
++	{ NULL, 0, NULL, 0 },
++};
++
+ int main(int argc, char **argv)
+ {
+ 	struct module_signature sig_info = { .id_type = PKEY_ID_PKCS7 };
+@@ -133,6 +154,7 @@ int main(int argc, char **argv)
+ 	char *private_key_name, *x509_name, *module_name, *dest_name;
+ 	bool save_sig = false, replace_orig;
+ 	bool sign_only = false;
++	bool detached = false;
+ 	unsigned char buf[4096];
+ 	unsigned long module_size, sig_size;
+ 	unsigned int use_signed_attrs;
+@@ -160,13 +182,17 @@ int main(int argc, char **argv)
+ #endif
+ 
+ 	do {
+-		opt = getopt(argc, argv, "dpk");
++		int idx;
++		opt = getopt_long(argc, argv, "dpkDhV", options, &idx);
+ 		switch (opt) {
+ 		case 'p': save_sig = true; break;
+ 		case 'd': sign_only = true; save_sig = true; break;
++		case 'D': detached = true; break;
+ #ifndef USE_PKCS7
+ 		case 'k': use_keyid = CMS_USE_KEYID; break;
+ #endif
++		case 'V': version(); exit(0); break;
++		case 'h': usage(); exit(0); break;
+ 		case -1: break;
+ 		default: format();
+ 		}
+@@ -192,7 +218,7 @@ int main(int argc, char **argv)
+ 
+ #ifdef USE_PKCS7
+ 	if (strcmp(hash_algo, "sha1") != 0) {
+-		fprintf(stderr, "sign-file: %s only supports SHA1 signing\n",
++		fprintf(stderr, "kmodsign %s only supports SHA1 signing\n",
+ 			OPENSSL_VERSION_TEXT);
+ 		exit(3);
+ 	}
+@@ -295,12 +321,14 @@ int main(int argc, char **argv)
+ 		return 0;
+ 
+ 	/* Append the marker and the PKCS#7 message to the destination file */
+-	ERR(BIO_reset(bm) < 0, "%s", module_name);
+-	while ((n = BIO_read(bm, buf, sizeof(buf))),
+-	       n > 0) {
+-		ERR(BIO_write(bd, buf, n) < 0, "%s", dest_name);
++	if (!detached) {
++		ERR(BIO_reset(bm) < 0, "%s", module_name);
++		while ((n = BIO_read(bm, buf, sizeof(buf))),
++		       n > 0) {
++			ERR(BIO_write(bd, buf, n) < 0, "%s", dest_name);
++		}
++		ERR(n < 0, "%s", module_name);
+ 	}
+-	ERR(n < 0, "%s", module_name);
+ 	module_size = BIO_number_written(bd);
+ 
+ #ifndef USE_PKCS7
