@@ -4,7 +4,7 @@ Description: Ubuntu kernel module signing
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/1526959
 Forwarded: not-needed
 Author: Andy Whitcroft <apw@ubuntu.com>
-Last-Update: 2016-05-09
+Last-Update: 2016-05-17
 
 Index: sbsigntool-0.6/src/Makefile.am
 ===================================================================
@@ -17,13 +17,14 @@ Index: sbsigntool-0.6/src/Makefile.am
  
  coff_headers = coff/external.h coff/pe.h
  AM_CFLAGS = -Wall -Wextra --std=gnu99
-@@ -35,3 +35,6 @@ sbkeysync_SOURCES = sbkeysync.c $(common
+@@ -35,3 +35,7 @@ sbkeysync_SOURCES = sbkeysync.c $(common
  sbkeysync_LDADD = $(common_LDADD) $(uuid_LIBS)
  sbkeysync_CPPFLAGS = $(EFI_CPPFLAGS)
  sbkeysync_CFLAGS = $(AM_CFLAGS) $(common_CFLAGS)
 +
 +kmodsign_SOURCES = kmodsign.c
 +kmodsign_LDADD = -lcrypto
++kmodsign_CFLAGS = $(AM_CFLAGS) $(common_CFLAGS)
 Index: sbsigntool-0.6/src/kmodsign.c
 ===================================================================
 --- /dev/null
@@ -352,3 +353,25 @@ Index: sbsigntool-0.6/src/kmodsign.c
 +
 +	return 0;
 +}
+Index: sbsigntool-0.6/docs/Makefile.am
+===================================================================
+--- sbsigntool-0.6.orig/docs/Makefile.am
++++ sbsigntool-0.6/docs/Makefile.am
+@@ -1,8 +1,8 @@
+ 
+-man1_MANS = sbsign.1 sbverify.1 sbattach.1 sbvarsign.1 sbsiglist.1
++man1_MANS = sbsign.1 sbverify.1 sbattach.1 sbvarsign.1 sbsiglist.1 kmodsign.1
+ 
+ EXTRA_DIST = sbsign.1.in sbverify.1.in sbattach.1.in \
+-		sbvarsign.1.in sbsiglist.1.in
++		sbvarsign.1.in sbsiglist.1.in kmodsign.1.in
+ CLEANFILES = $(man1_MANS)
+ 
+ $(builddir)/%.1: $(srcdir)/%.1.in $(top_builddir)/src/%
+Index: sbsigntool-0.6/docs/kmodsign.1.in
+===================================================================
+--- /dev/null
++++ sbsigntool-0.6/docs/kmodsign.1.in
+@@ -0,0 +1,2 @@
++[name]
++kmodsign - Kernel module signing tool

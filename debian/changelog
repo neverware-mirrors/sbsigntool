@@ -1,3 +1,10 @@
+sbsigntool (0.6-0ubuntu12) yakkety; urgency=low
+
+  * debian/patches/ubuntu-kernel-module-signing-fixes.patch: add help
+    and update program name.  This is used to generate the new manual page.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Tue, 17 May 2016 13:23:47 +0100
+
 sbsigntool (0.6-0ubuntu11) yakkety; urgency=medium
 
   * debian/patches/ubuntu-kernel-module-signing.patch: add signing support

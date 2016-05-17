@@ -38,3 +38,4 @@ sbkeysync_CFLAGS = $(AM_CFLAGS) $(common_CFLAGS)
 
 kmodsign_SOURCES = kmodsign.c
 kmodsign_LDADD = -lcrypto
+kmodsign_CFLAGS = $(AM_CFLAGS) $(common_CFLAGS)

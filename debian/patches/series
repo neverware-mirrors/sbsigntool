@@ -11,5 +11,6 @@ arm-arm64-support.patch
 0001-Handle-odd-buffer-lengths-in-checksum.patch
 sbverify_clear_out_cert_content.patch
 ubuntu-kernel-module-signing.patch
+ubuntu-kernel-module-signing-fixes.patch
 ubuntu-tests-disable-pie.patch
 ubuntu-clear-image-before-use.patch
