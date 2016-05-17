@@ -1,3 +1,12 @@
+sbsigntool (0.6-0ubuntu8.1) wily; urgency=medium
+
+  * debian/patches/ubuntu-kernel-module-signing.patch: add signing support
+    programs for Ubuntu archive signing.  (LP: #1579766)
+  * debian/patches/ubuntu-kernel-module-signing-fixes.patch: add help
+    and update program name.  This is used to generate the new manual page.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Tue, 17 May 2016 11:42:33 +0100
+
 sbsigntool (0.6-0ubuntu8) wily; urgency=medium
 
   * debian/patches/0001-Support-openssl-1.0.2b-and-above.patch: [PATCH]
