@@ -9,3 +9,4 @@ zero-sized-sections.patch
 arm-arm64-support.patch
 ubuntu-kernel-module-signing.patch
 ubuntu-kernel-module-signing-fixes.patch
+0001-Support-openssl-1.0.2b-and-above.patch
