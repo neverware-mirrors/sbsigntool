@@ -1,3 +1,12 @@
+sbsigntool (0.6-0ubuntu7.2) trusty; urgency=medium
+
+  * debian/patches/0001-Support-openssl-1.0.2b-and-above.patch: handle the
+    case where we can't get the issuer certificate, which typically happens
+    after 1.0.2b; but it appears that 1.0.1f includes that check too, which
+    fails in sbsigntool. (LP: #1474541)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 24 May 2016 14:24:45 -0400
+
 sbsigntool (0.6-0ubuntu7.1) trusty; urgency=medium
 
   * debian/patches/ubuntu-kernel-module-signing.patch: add signing support
