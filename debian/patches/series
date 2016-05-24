@@ -2,3 +2,5 @@ efi_arch_ia32.patch
 Align-signature-data-to-8-bytes.patch
 update_checksums.patch
 fix-signature-padding.patch
+0001-Support-openssl-1.0.2b-and-above.patch
+ignore-certificate-expiries.patch
