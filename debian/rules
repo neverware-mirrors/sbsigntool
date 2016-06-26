@@ -1,8 +1,17 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+include /usr/share/dpkg/architecture.mk
+
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
 %:
 	dh $@ --with autoreconf
+
+# Upstream tests are specific to x86, and require gcc-multilib which
+# is only available on some x86 architectures
+override_dh_auto_test:
+ifneq ($(filter amd64 i386 kfreebsd-amd64,$(DEB_HOST_ARCH)),)
+	dh_auto_test
+endif

@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Pierre Chifflier <pollux@debian.org>
 Build-Depends: debhelper (>= 9.0.0),
   dh-autoreconf,
-  gcc-multilib,
+  gcc-multilib [amd64 i386 kfreebsd-amd64],
   binutils-dev,
   libssl-dev,
   openssl,
@@ -14,13 +14,11 @@ Build-Depends: debhelper (>= 9.0.0),
   help2man,
   gnu-efi
 Standards-Version: 3.9.7
-Vcs-Bzr: lp:ubuntu/sbsigntool
 
 Package: sbsigntool
-Architecture: any-amd64 any-i386
+Architecture: any-amd64 any-i386 arm64 armhf
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Multi-Arch: foreign
 Description: Tools to manipulate signatures on UEFI binaries and drivers
  This package installs tools which can cryptographically sign EFI binaries and
  drivers.
- Currently it can only sign x86_64 EFI binaries and drivers.
