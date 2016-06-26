@@ -1,3 +1,14 @@
+sbsigntool (0.6-3.1) unstable; urgency=medium
+
+  * Non-maintainer upload with approval of maintainer
+  * Limit build-dependency on gcc-multilib to the architectures where it
+    is available, and disable tests where it is not
+  * Enable building on arm64 and armhf (Closes: #821144)
+  * Update OpenSSL API usage to support OpenSSL 1.1 (Closes: #828539)
+  * Remove incorrect Vcs-Bzr field
+
+ -- Ben Hutchings <ben@decadent.org.uk>  Sun, 26 Jun 2016 23:39:15 +0200
+
 sbsigntool (0.6-3) unstable; urgency=medium
 
   * Add sbsign_check_write_return.patch: check return when writing
