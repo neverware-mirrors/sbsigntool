@@ -220,12 +220,12 @@ int main(int argc, char **argv)
 	image_add_signature(ctx->image, buf, sigsize);
 
 	if (ctx->detached)
-		image_write_detached(ctx->image, ctx->outfilename);
+		rc = image_write_detached(ctx->image, ctx->outfilename);
 	else
-		image_write(ctx->image, ctx->outfilename);
+		rc = image_write(ctx->image, ctx->outfilename);
 
 	talloc_free(ctx);
 
-	return EXIT_SUCCESS;
+	return (rc == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
