@@ -13,3 +13,4 @@ sbverify_clear_out_cert_content.patch
 sbsign_check_write_return.patch
 update-openssl-api-usage-to-support-openssl-1.1.patch
 fix-efi-arch-detection.patch
+fix-linker-flags-for-test-cases.patch
