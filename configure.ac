@@ -64,7 +64,8 @@ PKG_CHECK_MODULES(uuid, uuid,
     AC_MSG_ERROR([libuuid (from the uuid package) is required]))
 
 dnl gnu-efi headers require extra include dirs
-EFI_ARCH=$(uname -m)
+AC_CANONICAL_HOST
+EFI_ARCH=$host_cpu
 case $EFI_ARCH in
 	i*86)
 		EFI_ARCH="ia32"
