@@ -1,3 +1,17 @@
+sbsigntool (0.6-3.2ubuntu1) artful; urgency=low
+
+  * Merge with Debian unstable, remaining changes:
+    - d/p/ubuntu-handle-odd-buffer-lengths-in-checksum.patch: correctly
+      handle odd byte length buffers.
+    - d/p/ubuntu-kernel-module-signing.patch and
+      d/p/ubuntu-kernel-module-signing-fixes.patch: add the kernel module
+      signing tool to the package.
+    - d/p/ubuntu-tests-disable-pie.patch: disable PIE
+    - d/p/ubuntu-clear-image-before-use.patch: avoid use of uninitialised
+      data causing a startup crash.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Fri, 28 Apr 2017 08:40:27 +0100
+
 sbsigntool (0.6-3.2) unstable; urgency=medium
 
   * Non-maintainer upload.
@@ -41,3 +55,140 @@ sbsigntool (0.6-1) unstable; urgency=low
   * Initial release (Closes: #702254)
 
  -- Pierre Chifflier <pollux@debian.org>  Wed, 23 Sep 2015 08:40:56 +0200
+
+sbsigntool (0.6-0ubuntu12) yakkety; urgency=low
+
+  * debian/patches/ubuntu-kernel-module-signing-fixes.patch: add help
+    and update program name.  This is used to generate the new manual page.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Tue, 17 May 2016 13:23:47 +0100
+
+sbsigntool (0.6-0ubuntu11) yakkety; urgency=medium
+
+  * debian/patches/ubuntu-kernel-module-signing.patch: add signing support
+    programs for Ubuntu archive signing.  (LP: #1579766)
+  * tests: disable PIE mode when building examples for signing.
+  * src/image.c: ensure we zero image objects on allocation.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Mon, 09 May 2016 14:25:49 +0100
+
+sbsigntool (0.6-0ubuntu10) xenial; urgency=medium
+
+  * debian/patches/sbverify_clear_out_cert_content.patch: clear out the
+    contents part of the certificate we're building for signature verification
+    from the EFI binary, in sbverify; OpenSSL 1.0.2e now enforces that there
+    isn't data and content sections together. Thanks to Marc Deslauriers for
+    help investigating this. (LP: #1526959)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 17 Dec 2015 14:55:09 -0500
+
+sbsigntool (0.6-0ubuntu9) xenial; urgency=medium
+
+  [ Linn Crosetto ]
+  * debian/patches/0001-Handle-odd-buffer-lengths-in-checksum.patch:
+    Fix checksum when handling buffers of odd length.  LP: #1511108
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 19 Nov 2015 16:32:19 -0500
+
+sbsigntool (0.6-0ubuntu8) wily; urgency=medium
+
+  * debian/patches/0001-Support-openssl-1.0.2b-and-above.patch: [PATCH]
+    Support openssl 1.0.2b and above.  Thanks to Marc Deslauriers
+    <marc.deslauriers@ubuntu.com>.  LP: #1474541.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 15 Jul 2015 08:57:46 -0700
+
+sbsigntool (0.6-0ubuntu7) trusty; urgency=medium
+
+  * debian/patches/del-duplicate-define.patch: Remove duplicate define.
+  * debian/patches/zero-sized-sections.patch: Fix failure in sbsigntool
+    when it encouters zero-sized PE/COFF image sections (LP: #1252288).
+  * debian/patches/arm-arm64-support.patch: Support signing ARM images.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 15 Apr 2014 14:54:42 +0100
+
+sbsigntool (0.6-0ubuntu6) trusty; urgency=low
+
+  * debian/patches/add_corrected_efivars_magic.patch: Cherry-picked upstream
+    fix to add corrected efivars magic (LP: #1257305)
+
+ -- Jean-Baptiste Lallement <jean-baptiste.lallement@ubuntu.com>  Tue, 03 Dec 2013 15:50:45 +0100
+
+sbsigntool (0.6-0ubuntu5) saucy; urgency=low
+
+  * debian/patches/ignore-certificate-expiries.patch: ignore certificate
+    expiries when verifying signatures.  Closes LP: #1234649.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 04 Oct 2013 01:43:03 +0000
+
+sbsigntool (0.6-0ubuntu4) saucy; urgency=low
+
+  * debian/patches/efi_arch_ia32.patch: Use AC_CANONICAL_HOST, not uname -m,
+    to determine target. Closes LP: #1066038.
+  * debian/patches/Align-signature-data-to-8-bytes.patch: Align signature
+    data to 8 bytes.  This matches the Microsoft signing implementation,
+    which enables us to use sbattach to verify the integrity of the binaries
+    returned by the SysDev signing service.
+  * debian/patches/update_checksums.patch: make sure we update the PE checksum
+    field as well, also needed for matching the Microsoft signing
+    implementation.
+  * debian/patches/fix-signature-padding.patch: fix calculation of the
+    size of our signature data, so that we don't write out extra zeroes
+    when we detach a signature.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 23 Aug 2013 21:07:17 -0700
+
+sbsigntool (0.6-0ubuntu3) saucy; urgency=low
+
+  * Build-depend on gcc-multilib to support building the test suite.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 17 Jun 2013 11:53:31 +0100
+
+sbsigntool (0.6-0ubuntu2) raring; urgency=low
+
+  * Mark sbsigntool Multi-Arch: foreign.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 08 Jan 2013 12:20:42 +0000
+
+sbsigntool (0.6-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+    - Uses the new mount point for the efivars directory, for compatibility
+      with the pending upstream kernel patches and compatibility with what
+      mountall is doing.  LP: #1063061.
+    - Fixes sbverify verification of the pkcs7 bundles that Microsoft-signed
+      binaries deliver to us, enabling us to do build-time verification of
+      shim-signed.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 11 Oct 2012 17:24:56 -0700
+
+sbsigntool (0.4-0ubuntu2) quantal; urgency=low
+
+  * Fix FTBFS on i386 by defining EFI_ARCH to ia32 instead of uname.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 02 Oct 2012 07:44:59 -0600
+
+sbsigntool (0.4-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+  * Add new uuid-dev and gnu-efi build dependancies.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Tue, 02 Oct 2012 10:15:17 +0100
+
+sbsigntool (0.3-0ubuntu2) quantal; urgency=low
+
+  * Only build on amd64 and i386 (LP: #1020771).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 01 Oct 2012 10:53:56 +0100
+
+sbsigntool (0.3-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 30 Jun 2012 01:37:52 +0000
+
+sbsigntool (0.2-0ubuntu1) quantal; urgency=low
+
+  * Initial release.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 28 Jun 2012 01:47:06 +0000
