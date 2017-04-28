@@ -1,7 +1,8 @@
 Source: sbsigntool
 Section: utils
 Priority: extra
-Maintainer: Pierre Chifflier <pollux@debian.org>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Pierre Chifflier <pollux@debian.org>
 Build-Depends: debhelper (>= 9.0.0),
   dh-autoreconf,
   gcc-multilib [amd64 i386 kfreebsd-amd64],

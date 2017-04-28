@@ -1,0 +1,17 @@
+Description: clear image before use
+ We rely on the image being clear as we will attempt to free
+ cirtain elements before reuse.  Switch to a zeroing allocate.
+Author: Andy Whitcroft <apw@ubuntu.com>
+Last-Update: 2016-05-09
+
+--- sbsigntool-0.6.orig/src/image.c
++++ sbsigntool-0.6/src/image.c
+@@ -459,7 +459,7 @@ struct image *image_load(const char *fil
+ 	struct image *image;
+ 	int rc;
+ 
+-	image = talloc(NULL, struct image);
++	image = talloc_zero(NULL, struct image);
+ 	if (!image) {
+ 		perror("talloc(image)");
+ 		return NULL;
