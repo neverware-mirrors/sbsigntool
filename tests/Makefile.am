@@ -29,7 +29,7 @@ test-i386.pecoff: test_lds = $(srcdir)/test-i386.lds
 test-i386.pecoff: ASFLAGS += -m32
 test-i386.pecoff: LDFLAGS += -m32
 
-test-%.elf: LDFLAGS = -nostdlib -T $(test_lds)
+test-%.elf: LDFLAGS = -nostdlib -T $(test_lds) -Wl,--no-dynamic-linker
 test-%.elf: test-%.$(OBJEXT) $(test_lds)
 	$(LINK) $<
 
