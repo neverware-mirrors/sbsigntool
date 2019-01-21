@@ -48,6 +48,7 @@
 #include "idc.h"
 #include "fileio.h"
 
+#include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -61,6 +62,9 @@
 #define X509_STORE_CTX_get0_cert(ctx) ((ctx)->cert)
 #define X509_STORE_get0_objects(certs) ((certs)->objs)
 #define X509_get_extended_key_usage(cert) ((cert)->ex_xkusage)
+#if OPENSSL_VERSION_NUMBER < 0x10020000L
+#define X509_STORE_CTX_get0_store(ctx) ((ctx)->ctx)
+#endif
 #endif
 
 static const char *toolname = "sbverify";
@@ -73,7 +77,7 @@ enum verify_status {
 
 static struct option options[] = {
 	{ "cert", required_argument, NULL, 'c' },
-	{ "no-verify", no_argument, NULL, 'n' },
+	{ "list", no_argument, NULL, 'l' },
 	{ "detached", required_argument, NULL, 'd' },
 	{ "verbose", no_argument, NULL, 'v' },
 	{ "help", no_argument, NULL, 'h' },
@@ -87,7 +91,7 @@ static void usage(void)
 		"Verify a UEFI secure boot image.\n\n"
 		"Options:\n"
 		"\t--cert <certfile>  certificate (x509 certificate)\n"
-		"\t--no-verify        don't perform certificate verification\n"
+		"\t--list             list all signatures (but don't verify)\n"
 		"\t--detached <file>  read signature from <file>, instead of\n"
 		"\t                    looking for an embedded signature\n",
 			toolname);
@@ -171,23 +175,6 @@ static void print_certificate_store_certs(X509_STORE *certs)
 	}
 }
 
-static int load_image_signature_data(struct image *image,
-		uint8_t **buf, size_t *len)
-{
-	struct cert_table_header *header;
-
-	if (!image->data_dir_sigtable->addr
-			|| !image->data_dir_sigtable->size) {
-		fprintf(stderr, "No signature table present\n");
-		return -1;
-	}
-
-	header = (void *)image->buf + image->data_dir_sigtable->addr;
-	*buf = (void *)(header + 1);
-	*len = header->size - sizeof(*header);
-	return 0;
-}
-
 static int load_detached_signature_data(struct image *image,
 		const char *filename, uint8_t **buf, size_t *len)
 {
@@ -223,21 +210,20 @@ static int x509_verify_cb(int status, X509_STORE_CTX *ctx)
 			== XKU_CODE_SIGN)
 		status = 1;
 
-	/* all certs given with the --cert argument are trusted */
 	else if (err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY ||
-			err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT ||
-			err == X509_V_ERR_CERT_UNTRUSTED) {
+		 err == X509_V_ERR_CERT_UNTRUSTED ||
+		 err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT ||
+		 err == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE) {
+		/* all certs given with the --cert argument are trusted */
 
 		if (cert_in_store(X509_STORE_CTX_get_current_cert(ctx), ctx))
 			status = 1;
-	}
-	/* UEFI doesn't care about expired signatures, so we shouldn't either. */
-	else if (err == X509_V_ERR_CERT_HAS_EXPIRED ||
-			err == X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD ||
-			err == X509_V_ERR_CERT_NOT_YET_VALID ||
-			err == X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD) {
+	} else if (err == X509_V_ERR_CERT_HAS_EXPIRED ||
+		   err == X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD ||
+		   err == X509_V_ERR_CERT_NOT_YET_VALID ||
+		   err == X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD)
+		/* UEFI explicitly allows expired certificates */
 		status = 1;
-	}
 
 	return status;
 }
@@ -246,7 +232,7 @@ int main(int argc, char **argv)
 {
 	const char *detached_sig_filename, *image_filename;
 	enum verify_status status;
-	int rc, c, flags, verify;
+	int rc, c, flags, list;
 	const uint8_t *tmp_buf;
 	struct image *image;
 	X509_STORE *certs;
@@ -256,19 +242,26 @@ int main(int argc, char **argv)
 	bool verbose;
 	BIO *idcbio;
 	PKCS7 *p7;
+	int sig_count = 0;
 
 	status = VERIFY_FAIL;
 	certs = X509_STORE_new();
-	verify = 1;
+	list = 0;
 	verbose = false;
 	detached_sig_filename = NULL;
 
 	OpenSSL_add_all_digests();
 	ERR_load_crypto_strings();
+	OPENSSL_config(NULL);
+	/* here we may get highly unlikely failures or we'll get a
+	 * complaint about FIPS signatures (usually becuase the FIPS
+	 * module isn't present).  In either case ignore the errors
+	 * (malloc will cause other failures out lower down */
+	ERR_clear_error();
 
 	for (;;) {
 		int idx;
-		c = getopt_long(argc, argv, "c:d:nVh", options, &idx);
+		c = getopt_long(argc, argv, "c:d:lvVh", options, &idx);
 		if (c == -1)
 			break;
 
@@ -281,8 +274,8 @@ int main(int argc, char **argv)
 		case 'd':
 			detached_sig_filename = optarg;
 			break;
-		case 'n':
-			verify = 0;
+		case 'l':
+			list = 1;
 			break;
 		case 'v':
 			verbose = true;
@@ -310,60 +303,80 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (detached_sig_filename)
-		rc = load_detached_signature_data(image, detached_sig_filename,
-				&sig_buf, &sig_size);
-	else
-		rc = load_image_signature_data(image, &sig_buf, &sig_size);
+	for (;;) {
+		if (detached_sig_filename) {
+			if (sig_count++)
+				break;
 
-	if (rc) {
-		fprintf(stderr, "Unable to read signature data from %s\n",
-				detached_sig_filename ? : image_filename);
-		goto out;
+			rc = load_detached_signature_data(image, detached_sig_filename,
+							  &sig_buf, &sig_size);
+		} else
+			rc = image_get_signature(image, sig_count++, &sig_buf, &sig_size);
+
+		if (rc) {
+			if (sig_count == 0) {
+				fprintf(stderr, "Unable to read signature data from %s\n",
+					detached_sig_filename ? : image_filename);
+			}
+			break;
+		}
+
+		tmp_buf = sig_buf;
+		if (verbose || list)
+			printf("signature %d\n", sig_count);
+		p7 = d2i_PKCS7(NULL, &tmp_buf, sig_size);
+		if (!p7) {
+			fprintf(stderr, "Unable to parse signature data\n");
+			ERR_print_errors_fp(stderr);
+			break;
+		}
+
+		if (verbose || list) {
+			print_signature_info(p7);
+			//print_certificate_store_certs(certs);
+		}
+
+		if (list)
+			continue;
+
+		idcbio = BIO_new(BIO_s_mem());
+		idc = IDC_get(p7, idcbio);
+		if (!idc) {
+			fprintf(stderr, "Unable to get IDC from PKCS7\n");
+			break;
+		}
+
+		rc = IDC_check_hash(idc, image);
+		if (rc) {
+			fprintf(stderr, "Image fails hash check\n");
+			break;
+		}
+
+		flags = PKCS7_BINARY;
+
+		/* OpenSSL 1.0.2e no longer allows calling PKCS7_verify with
+		 * both data and content. Empty out the content. */
+		p7->d.sign->contents->d.ptr = NULL;
+
+		X509_STORE_set_verify_cb_func(certs, x509_verify_cb);
+		rc = PKCS7_verify(p7, NULL, certs, idcbio, NULL, flags);
+		if (rc) {
+			if (verbose)
+				printf("PKCS7 verification passed\n");
+
+			status = VERIFY_OK;
+		} else if (verbose) {
+			printf("PKCS7 verification failed\n");
+			ERR_print_errors_fp(stderr);
+		}
+
 	}
 
-	tmp_buf = sig_buf;
-	p7 = d2i_PKCS7(NULL, &tmp_buf, sig_size);
-	if (!p7) {
-		fprintf(stderr, "Unable to parse signature data\n");
-		ERR_print_errors_fp(stderr);
-		goto out;
-	}
-
-	if (verbose) {
-		print_signature_info(p7);
-		print_certificate_store_certs(certs);
-	}
-
-	idcbio = BIO_new(BIO_s_mem());
-	idc = IDC_get(p7, idcbio);
-	if (!idc)
-		goto out;
-
-	rc = IDC_check_hash(idc, image);
-	if (rc)
-		goto out;
-
-	flags = PKCS7_BINARY;
-	if (!verify)
-		flags |= PKCS7_NOVERIFY;
-
-	/* OpenSSL 1.0.2e no longer allows calling PKCS7_verify with
-	 * both data and content. Empty out the content. */
-	p7->d.sign->contents->d.ptr=0;
-
-	X509_STORE_set_verify_cb_func(certs, x509_verify_cb);
-	rc = PKCS7_verify(p7, NULL, certs, idcbio, NULL, flags);
-	if (!rc) {
-		printf("PKCS7 verification failed\n");
-		ERR_print_errors_fp(stderr);
-		goto out;
-	}
-
-	status = VERIFY_OK;
-
-out:
 	talloc_free(image);
+
+	if (list)
+		exit(EXIT_SUCCESS);
+
 	if (status == VERIFY_OK)
 		printf("Signature verification OK\n");
 	else

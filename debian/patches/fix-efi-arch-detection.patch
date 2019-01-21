@@ -5,15 +5,17 @@ Description: Fix EFI architecture detection
  In a cross-building environment or compat environment, this is not the
  same as the host architecture.  Use  AC_CANONICAL_HOST instead.
 
---- a/configure.ac
-+++ b/configure.ac
+Index: sbsigntool/configure.ac
+===================================================================
+--- sbsigntool.orig/configure.ac
++++ sbsigntool/configure.ac
 @@ -64,7 +64,8 @@ PKG_CHECK_MODULES(uuid, uuid,
      AC_MSG_ERROR([libuuid (from the uuid package) is required]))
  
  dnl gnu-efi headers require extra include dirs
--EFI_ARCH=$(uname -m)
+-EFI_ARCH=$(uname -m | sed 's/i.86/ia32/;s/arm.*/arm/')
 +AC_CANONICAL_HOST
-+EFI_ARCH=$host_cpu
- case $EFI_ARCH in
- 	i*86)
- 		EFI_ARCH="ia32"
++EFI_ARCH=$(echo $host_cpu | sed 's/i.86/ia32/;s/arm.*/arm/')
+ AM_CONDITIONAL(TEST_BINARY_FORMAT, [ test "$EFI_ARCH" = "arm" -o "$EFI_ARCH" = "aarch64" ])
+ 
+ ##

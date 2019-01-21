@@ -1,4 +1,4 @@
-AC_INIT([sbsigntool], [0.6], [jeremy.kerr@canonical.com])
+AC_INIT([sbsigntool], [0.9.2], [James.Bottomley@HansenPartnership.com])
 
 AM_INIT_AUTOMAKE()
 
@@ -65,12 +65,21 @@ PKG_CHECK_MODULES(uuid, uuid,
 
 dnl gnu-efi headers require extra include dirs
 AC_CANONICAL_HOST
-EFI_ARCH=$host_cpu
-case $EFI_ARCH in
-	i*86)
-		EFI_ARCH="ia32"
-		;;
-esac
+EFI_ARCH=$(echo $host_cpu | sed 's/i.86/ia32/;s/arm.*/arm/')
+AM_CONDITIONAL(TEST_BINARY_FORMAT, [ test "$EFI_ARCH" = "arm" -o "$EFI_ARCH" = "aarch64" ])
+
+##
+# no consistent view of where gnu-efi should dump the efi stuff, so find it
+##
+for path in /lib /lib64 /usr/lib /usr/lib64 /usr/lib32 /lib/efi /lib64/efi /usr/lib/efi /usr/lib64/efi /usr/lib/gnuefi /usr/lib64/gnuefi ; do
+    if test -e $path/crt0-efi-$EFI_ARCH.o; then
+       CRTPATH=$path
+    fi
+done
+if test -z "$CRTPATH"; then
+   AC_MSG_ERROR([cannot find the gnu-efi crt path])
+fi
+
 EFI_CPPFLAGS="-I/usr/include/efi -I/usr/include/efi/$EFI_ARCH \
  -DEFI_FUNCTION_WRAPPER"
 CPPFLAGS_save="$CPPFLAGS"
@@ -78,6 +87,8 @@ CPPFLAGS="$CPPFLAGS $EFI_CPPFLAGS"
 AC_CHECK_HEADERS([efi.h], [], [], $EFI_INCLUDES)
 CPPFLAGS="$CPPFLAGS_save"
 AC_SUBST(EFI_CPPFLAGS, $EFI_CPPFLAGS)
+AC_SUBST(EFI_ARCH, $EFI_ARCH)
+AC_SUBST(CRTPATH, $CRTPATH)
 
 AC_CONFIG_FILES([Makefile src/Makefile lib/ccan/Makefile]
 		[docs/Makefile tests/Makefile])
