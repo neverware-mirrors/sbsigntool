@@ -658,7 +658,7 @@ int image_write(struct image *image, const char *filename)
 
 	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
-		perror("open");
+		perror("image_write/open");
 		return -1;
 	}
 
