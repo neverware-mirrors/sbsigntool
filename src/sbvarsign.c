@@ -45,6 +45,7 @@
 #include <uuid/uuid.h>
 
 #include <openssl/bio.h>
+#include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -268,7 +269,7 @@ static int add_auth_descriptor(struct varsign_context *ctx)
 		return -1;
 	}
 
-	len = i2d_PKCS7(p7, NULL);
+	len = i2d_PKCS7_SIGNED(p7->d.sign, NULL);
 
 
 	/* set up our auth descriptor */
@@ -280,7 +281,7 @@ static int add_auth_descriptor(struct varsign_context *ctx)
 	auth->AuthInfo.Hdr.wCertificateType = 0x0EF1;
 	auth->AuthInfo.CertType = cert_pkcs7_guid;
 	tmp = auth->AuthInfo.CertData;
-	i2d_PKCS7(p7, &tmp);
+	i2d_PKCS7_SIGNED(p7->d.sign, &tmp);
 
 	ctx->auth_descriptor = auth;
 	ctx->auth_descriptor_len = sizeof(*auth) + len;
@@ -397,6 +398,7 @@ static struct option options[] = {
 	{ "verbose", no_argument, NULL, 'v' },
 	{ "help", no_argument, NULL, 'h' },
 	{ "version", no_argument, NULL, 'V' },
+	{ "engine", required_argument, NULL, 'e'},
 	{ NULL, 0, NULL, 0 },
 };
 
@@ -408,6 +410,7 @@ void usage(void)
 			"<var-name> <var-data-file>\n"
 		"Sign a blob of data for use in SetVariable().\n\n"
 		"Options:\n"
+		"\t--engine <eng>     use the specified engine to load the key\n"
 		"\t--key <keyfile>    signing key (PEM-encoded RSA "
 						"private key)\n"
 		"\t--cert <certfile>  certificate (x509 certificate)\n"
@@ -436,7 +439,7 @@ static void version(void)
 
 int main(int argc, char **argv)
 {
-	const char *guid_str, *attr_str, *varname;
+	const char *guid_str, *attr_str, *varname, *engine;
 	const char *keyfilename, *certfilename;
 	struct varsign_context *ctx;
 	bool include_attrs;
@@ -446,13 +449,14 @@ int main(int argc, char **argv)
 
 	keyfilename = NULL;
 	certfilename = NULL;
+	engine = NULL;
 	guid_str = NULL;
 	attr_str= NULL;
 	include_attrs = false;
 
 	for (;;) {
 		int idx;
-		c = getopt_long(argc, argv, "o:g:a:k:c:ivVh", options, &idx);
+		c = getopt_long(argc, argv, "o:g:a:k:c:ivVhe:", options, &idx);
 		if (c == -1)
 			break;
 
@@ -484,6 +488,9 @@ int main(int argc, char **argv)
 		case 'h':
 			usage();
 			return EXIT_SUCCESS;
+		case 'e':
+			engine = optarg;
+			break;
 		}
 	}
 
@@ -506,6 +513,12 @@ int main(int argc, char **argv)
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
 	ERR_load_crypto_strings();
+	OPENSSL_config(NULL);
+	/* here we may get highly unlikely failures or we'll get a
+	 * complaint about FIPS signatures (usually becuase the FIPS
+	 * module isn't present).  In either case ignore the errors
+	 * (malloc will cause other failures out lower down */
+	ERR_clear_error();
 
 	/* set up the variable signing context */
 	varname = argv[optind];
@@ -535,7 +548,10 @@ int main(int argc, char **argv)
 	if (fileio_read_file(ctx, ctx->infilename, &ctx->data, &ctx->data_len))
 		return EXIT_FAILURE;
 
-	ctx->key = fileio_read_pkey(keyfilename);
+	if (engine)
+		ctx->key = fileio_read_engine_key(engine, keyfilename);
+	else
+		ctx->key = fileio_read_pkey(keyfilename);
 	if (!ctx->key)
 		return EXIT_FAILURE;
 
