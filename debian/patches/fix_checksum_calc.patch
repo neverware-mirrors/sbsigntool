@@ -1,0 +1,37 @@
+Author: Steve McIntyre <93sam@debian.org>
+Date: Fri, 19 Jun 2019 23:35:44 +0200
+Description: Fix PE/COFF checksum calculation
+ Upstream reconfigured the code to allow for multiple checksums to be
+ included on a binary, but mis-handled the change to buffer and
+ checksum handling such that the cert_table header was now being
+ counted twice. Fix that.
+diff --git a/src/image.c b/src/image.c
+index 745191f..3ada37b 100644
+--- a/src/image.c
++++ b/src/image.c
+@@ -162,7 +162,6 @@ static void image_pecoff_update_checksum(struct image *image)
+ {
+ 	bool is_signed = image->sigsize && image->sigbuf;
+ 	uint32_t checksum;
+-	struct cert_table_header *cert_table = image->cert_table;
+ 
+ 	/* We carefully only include the signature data in the checksum (and
+ 	 * in the file length) if we're outputting the signature.  Otherwise,
+@@ -180,16 +179,13 @@ static void image_pecoff_update_checksum(struct image *image)
+ 			(void *)(image->checksum + 1));
+ 
+ 	if (is_signed) {
+-		checksum = csum_bytes(checksum,
+-				cert_table, sizeof(*cert_table));
+-
+ 		checksum = csum_bytes(checksum, image->sigbuf, image->sigsize);
+ 	}
+ 
+ 	checksum += image->data_size;
+ 
+ 	if (is_signed)
+-		checksum += sizeof(*cert_table) + image->sigsize;
++		checksum += image->sigsize;
+ 
+ 	*(image->checksum) = cpu_to_le32(checksum);
+ }
