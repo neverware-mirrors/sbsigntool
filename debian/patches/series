@@ -1,3 +1,6 @@
 sbsign_check_write_return.patch
 fix-efi-arch-detection.patch
+ubuntu-kernel-module-signing.patch
+ubuntu-kernel-module-signing-fixes.patch
+ubuntu-clear-image-before-use.patch
 fix_checksum_calc.patch

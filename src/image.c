@@ -460,7 +460,7 @@ struct image *image_load(const char *filename)
 	struct image *image;
 	int rc;
 
-	image = talloc(NULL, struct image);
+	image = talloc_zero(NULL, struct image);
 	if (!image) {
 		perror("talloc(image)");
 		return NULL;
