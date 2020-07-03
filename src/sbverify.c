@@ -46,6 +46,7 @@
 
 #include "image.h"
 #include "idc.h"
+#include "fileio.h"
 
 #include <openssl/err.h>
 #include <openssl/bio.h>
@@ -90,34 +91,13 @@ static void version(void)
 int load_cert(X509_STORE *certs, const char *filename)
 {
 	X509 *cert;
-	BIO *bio;
 
-	bio = NULL;
-	cert = NULL;
-
-	bio = BIO_new_file(filename, "r");
-	if (!bio) {
-		fprintf(stderr, "Couldn't open file %s\n", filename);
-		goto err;
-	}
-
-	cert = PEM_read_bio_X509(bio, NULL, NULL, NULL);
-	if (!cert) {
-		fprintf(stderr, "Couldn't read certificate file %s\n",
-				filename);
-		goto err;
-	}
+	cert = fileio_read_cert(filename);
+	if (!cert)
+		return -1;
 
 	X509_STORE_add_cert(certs, cert);
 	return 0;
-
-err:
-	ERR_print_errors_fp(stderr);
-	if (cert)
-		X509_free(cert);
-	if (bio)
-		BIO_free(bio);
-	return -1;
 }
 
 static int load_image_signature_data(struct image *image,
@@ -131,7 +111,7 @@ static int load_image_signature_data(struct image *image,
 		return -1;
 	}
 
-	header = image->buf + image->data_dir_sigtable->addr;
+	header = (void *)image->buf + image->data_dir_sigtable->addr;
 	*buf = (void *)(header + 1);
 	*len = header->size - sizeof(*header);
 	return 0;
@@ -140,43 +120,7 @@ static int load_image_signature_data(struct image *image,
 static int load_detached_signature_data(struct image *image,
 		const char *filename, uint8_t **buf, size_t *len)
 {
-	struct stat statbuf;
-	uint8_t *tmpbuf = NULL;
-	int fd, rc;
-
-	fd = open(filename, O_RDONLY);
-	if (fd < 0) {
-		fprintf(stderr, "Couldn't open %s: %s\n", filename,
-				strerror(errno));
-		return -1;
-	}
-
-	rc = fstat(fd, &statbuf);
-	if (rc) {
-		perror("stat");
-		goto err;
-	}
-
-	tmpbuf = talloc_array(image, uint8_t, statbuf.st_size);
-	if (!tmpbuf) {
-		perror("talloc_array");
-		goto err;
-	}
-
-	rc = read_all(fd, tmpbuf, statbuf.st_size);
-	if (!rc) {
-		perror("read_all");
-		goto err;
-	}
-
-	*buf = tmpbuf;
-	*len = statbuf.st_size;
-	return 0;
-
-err:
-	close(fd);
-	talloc_free(tmpbuf);
-	return -1;
+	return fileio_read_file(image, filename, buf, len);
 }
 
 static int x509_verify_cb(int status, X509_STORE_CTX *ctx)
@@ -253,8 +197,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Can't open image %s\n", image_filename);
 		return EXIT_FAILURE;
 	}
-
-	image_find_regions(image);
 
 	if (detached_sig_filename)
 		rc = load_detached_signature_data(image, detached_sig_filename,
