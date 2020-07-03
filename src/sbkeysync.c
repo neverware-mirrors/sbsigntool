@@ -43,12 +43,11 @@
 
 #include <getopt.h>
 
-#include <efi.h>
-
 #include <ccan/list/list.h>
 #include <ccan/array_size/array_size.h>
 #include <ccan/talloc/talloc.h>
 
+#include <openssl/conf.h>
 #include <openssl/x509.h>
 #include <openssl/err.h>
 
@@ -56,7 +55,8 @@
 #include "efivars.h"
 
 #define EFIVARS_MOUNTPOINT	"/sys/firmware/efi/efivars"
-#define EFIVARS_FSTYPE		0x6165676C
+#define PSTORE_FSTYPE		0x6165676C
+#define EFIVARS_FSTYPE		0xde5e81e4
 
 #define EFI_IMAGE_SECURITY_DATABASE_GUID \
 	{ 0xd719b2cb, 0x3d3a, 0x4596, \
@@ -203,16 +203,15 @@ static int x509_key_parse(struct key *key, uint8_t *data, size_t len)
 		return -1;
 
 	/* we use the X509 serial number as the key ID */
-	if (!x509->cert_info || !x509->cert_info->serialNumber)
+	serial = X509_get_serialNumber(x509);
+	if (!serial)
 		goto out;
-
-	serial = x509->cert_info->serialNumber;
 
 	key->id_len = ASN1_STRING_length(serial);
 	key->id = talloc_memdup(key, ASN1_STRING_data(serial), key->id_len);
 
 	key->description = talloc_array(key, char, description_len);
-	X509_NAME_oneline(x509->cert_info->subject,
+	X509_NAME_oneline(X509_get_subject_name(x509),
 			key->description, description_len);
 
 	rc = 0;
@@ -533,7 +532,7 @@ static int check_efivars_mount(const char *mountpoint)
 	if (rc)
 		return -1;
 
-	if (statbuf.f_type != EFIVARS_FSTYPE)
+	if (statbuf.f_type != EFIVARS_FSTYPE && statbuf.f_type != PSTORE_FSTYPE)
 		return -1;
 
 	return 0;
@@ -931,6 +930,12 @@ int main(int argc, char **argv)
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_digests();
 	OpenSSL_add_all_ciphers();
+	OPENSSL_config(NULL);
+	/* here we may get highly unlikely failures or we'll get a
+	 * complaint about FIPS signatures (usually becuase the FIPS
+	 * module isn't present).  In either case ignore the errors
+	 * (malloc will cause other failures out lower down */
+	ERR_clear_error();
 
 	ctx->filesystem_keys = init_keyset(ctx);
 	ctx->firmware_keys = init_keyset(ctx);
