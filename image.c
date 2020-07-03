@@ -15,6 +15,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
+ *
+ * In addition, as a special exception, the copyright holders give
+ * permission to link the code of portions of this program with the OpenSSL
+ * library under certain conditions as described in each individual source file,
+ * and distribute linked combinations including the two.
+ *
+ * You must obey the GNU General Public License in all respects for all
+ * of the code used other than OpenSSL. If you modify file(s) with this
+ * exception, you may extend this exception to your version of the
+ * file(s), but you are not obligated to do so. If you do not wish to do
+ * so, delete this exception statement from your version. If you delete
+ * this exception statement from all source files in the program, then
+ * also delete it here.
  */
 
 #include <stdbool.h>
@@ -304,14 +317,27 @@ int image_find_regions(struct image *image)
 		fprintf(stderr, "gaps in the section table may result in "
 				"different checksums\n");
 
-	if (bytes + image->cert_table_size != image->size) {
-		fprintf(stderr, "warning: data remaining[%zd vs %zd]: gaps "
-				"between PE/COFF sections?\n",
-				bytes, image->size);
-	}
-
 	qsort(image->checksum_regions, image->n_checksum_regions,
 			sizeof(struct region), cmp_regions);
+
+	if (bytes + image->cert_table_size != image->size) {
+		int n = image->n_checksum_regions++;
+		struct region *r;
+
+		image->checksum_regions = talloc_realloc(image,
+				image->checksum_regions,
+				struct region,
+				image->n_checksum_regions);
+		r = &image->checksum_regions[n];
+		r->name = "endjunk";
+		r->data = image->buf + bytes;
+		r->size = image->size - bytes - image->cert_table_size;
+
+		fprintf(stderr, "warning: data remaining[%zd vs %zd]: gaps "
+				"between PE/COFF sections?\n",
+				bytes + image->cert_table_size, image->size);
+		
+	}
 
 	return 0;
 }
@@ -359,7 +385,8 @@ int image_write(struct image *image, const char *filename)
 
 	/* optionally update the image to contain signature data */
 	if (is_signed) {
-		cert_table_header.size = image->sigsize;
+		cert_table_header.size = image->sigsize +
+						sizeof(cert_table_header);
 		cert_table_header.revision = 0x0200; /* = revision 2 */
 		cert_table_header.type = 0x0002; /* PKCS signedData */
 
