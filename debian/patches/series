@@ -4,3 +4,4 @@ ubuntu-kernel-module-signing.patch
 ubuntu-kernel-module-signing-fixes.patch
 ubuntu-clear-image-before-use.patch
 fix_checksum_calc.patch
+sbkeysync-Don-t-ignore-errors-from-insert_new_keys.patch
