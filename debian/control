@@ -21,6 +21,7 @@ Standards-Version: 3.9.7
 Package: sbsigntool
 Architecture: any-amd64 any-i386 arm64 armhf
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Breaks: secureboot-db (<< 1.7~)
 Multi-Arch: foreign
 Description: Tools to manipulate signatures on UEFI binaries and drivers
  This package installs tools which can cryptographically sign EFI binaries and

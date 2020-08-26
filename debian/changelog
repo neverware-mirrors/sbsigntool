@@ -1,3 +1,10 @@
+sbsigntool (0.9.2-2ubuntu4) groovy; urgency=medium
+
+  * Add a Breaks for secureboot-db versions that did not yet have a
+    secureboot-db.service that permits a non-zero sbkeysync exitcode.
+
+ -- dann frazier <dannf@ubuntu.com>  Wed, 26 Aug 2020 15:57:13 -0600
+
 sbsigntool (0.9.2-2ubuntu3) groovy; urgency=medium
 
   * sbkeysync: exit non-zero upon key insertion failure. (LP: #1892797)
